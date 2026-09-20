@@ -1,8 +1,8 @@
 import { Effect } from "effect"
 import type { DatabaseMigration } from "../migration"
- 
+
 export default {
-  id: "20260919130000_student_error",
+  id: "20260919180654_student_error",
   up(tx) {
     return Effect.gen(function* () {
       yield* tx.run(`
@@ -24,4 +24,3 @@ export default {
     })
   },
 } satisfies DatabaseMigration.Migration
- 

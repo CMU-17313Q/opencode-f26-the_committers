@@ -175,6 +175,7 @@ export const SessionContextEpochTable = sqliteTable("session_context_epoch", {
   baseline_seq: integer().notNull(),
 })
 
+// Added a Student Error table to store errors encountered by students during sessions. 
 export const StudentErrorTable = sqliteTable(
   "student_error", 
   {
