@@ -12,7 +12,10 @@ import { SessionStudentError } from "@opencode-ai/core/session/student-error"
 import { testEffect } from "./lib/effect"
 
 const it = testEffect(AppNodeBuilder.build(LayerNode.group([Database.node, SessionStudentError.node])))
+// the session IDs used in the tests
 const sessionID = SessionV2.ID.make("ses_student_error_test")
+const otherSessionID = SessionV2.ID.make("ses_student_error_other")
+
 
 const setup = Effect.gen(function* () {
   const { db } = yield* Database.Service
@@ -20,7 +23,7 @@ const setup = Effect.gen(function* () {
     .insert(ProjectTable)
     .values({ id: Project.ID.global, worktree: AbsolutePath.make("/project"), sandboxes: [] })
     .run()
-    .pipe(Effect.orDie)
+    .pipe(Effect.orDie) // effect.orDie is used to cause the test to fail if any errors occur
   yield* db
     .insert(SessionTable)
     .values({
@@ -35,6 +38,7 @@ const setup = Effect.gen(function* () {
     .pipe(Effect.orDie)
 })
 
+// the test for recording student errors
 describe("SessionStudentError", () => {
   it.effect("records syntax, type, and failed-test errors with their details", () =>
     Effect.gen(function* () {
@@ -66,6 +70,7 @@ describe("SessionStudentError", () => {
         source: "bash",
       })
 
+      // tests that the errors were recorded correctly
       expect(
         (yield* errors.list(sessionID)).map((row) => ({
           category: row.category,
@@ -78,6 +83,15 @@ describe("SessionStudentError", () => {
         { category: "type_error", code: "TS2322", file: "src/main.ts", line: 8 },
         { category: "test_failed", code: null, file: null, line: null },
       ])
+    }),
+  )
+
+  // test that listing errors for a session with no errors returns an empty list
+  it.effect("returns an empty list when a session has no errors", () =>
+    Effect.gen(function* () {
+      yield* setup
+      const errors = yield* SessionStudentError.Service
+      expect(yield* errors.list(otherSessionID)).toEqual([])
     }),
   )
 })

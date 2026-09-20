@@ -1,5 +1,5 @@
 export * as SessionStudentError from "./student-error"
- 
+// imports needed: 
 import { asc, eq } from "drizzle-orm"
 import { Context, Effect, Layer } from "effect"
 import { Database } from "../database/database"
@@ -9,6 +9,7 @@ import { StudentErrorTable } from "./sql"
  
 export type Row = typeof StudentErrorTable.$inferSelect
  
+// these are the fields that are returned when listing errors for a session
 export interface Input {
   readonly sessionID: SessionSchema.ID
   readonly category: string
@@ -19,6 +20,7 @@ export interface Input {
   readonly source: string
 }
  
+// the interface for the service that records and lists student errors
 export interface Interface {
   readonly record: (input: Input) => Effect.Effect<void>
   readonly list: (sessionID: SessionSchema.ID) => Effect.Effect<ReadonlyArray<Row>>
@@ -26,11 +28,13 @@ export interface Interface {
  
 export class Service extends Context.Service<Service, Interface>()("@opencode/v2/SessionStudentError") {}
  
+// the layer that provides the service implementation
 const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
     const { db } = yield* Database.Service
  
+    // this is where values are icluded into the db
     const record = Effect.fn("SessionStudentError.record")(function* (input: Input) {
       yield* db
         .insert(StudentErrorTable)
@@ -47,6 +51,7 @@ const layer = Layer.effect(
         .pipe(Effect.orDie)
     })
  
+    // returns a list of errors for a given session, ordered by id
     const list = Effect.fn("SessionStudentError.list")(function* (sessionID: SessionSchema.ID) {
       return yield* db
         .select()
