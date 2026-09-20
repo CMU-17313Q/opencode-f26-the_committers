@@ -1,9 +1,9 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "8a45047d-7642-4a0c-92c3-ae88ca56cdbb",
+  "id": "e2c8484d-d9e5-4d6f-8510-874d7d12e806",
   "prevIds": [
-    "f14a9b18-8207-487e-a3d3-227e629ba9ad"
+    "8a45047d-7642-4a0c-92c3-ae88ca56cdbb"
   ],
   "ddl": [
     {
@@ -1740,21 +1740,6 @@
       "name": "fk_session_project_id_project_id_fk",
       "entityType": "fks",
       "table": "session"
-    },
-    {
-      "columns": [
-        "session_id"
-      ],
-      "tableTo": "session",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "nameExplicit": false,
-      "name": "fk_student_error_session_id_session_id_fk",
-      "entityType": "fks",
-      "table": "student_error"
     },
     {
       "columns": [

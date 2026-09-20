@@ -222,8 +222,7 @@ export default {
           \`file\` text,
           \`line\` integer,
           \`source\` text NOT NULL,
-          \`time_created\` integer NOT NULL,
-          CONSTRAINT \`fk_student_error_session_id_session_id_fk\` FOREIGN KEY (\`session_id\`) REFERENCES \`session\`(\`id\`) ON DELETE CASCADE
+          \`time_created\` integer NOT NULL
         );
       `)
       yield* tx.run(`

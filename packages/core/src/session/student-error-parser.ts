@@ -15,7 +15,7 @@ const compilerError = /^(.+?)(?:\((\d+),\d+\):|:(\d+):\d+ -) error (TS\d+): (.*)
 const colors = /\u001b\[[0-9;]*m/g
  
 // this matches a failed test line like `x test name [12ms]` or `(fail) test name [12ms]`
-const failedTest = /^(?:x|\(fail\)) (.+?)(?: \[[\d.]+ms\])?$/
+const failedTest = /^(?:[\u2717\u2718]|\(fail\)) (.+?)(?: ?\[[\d.]+ms\])?$/
 
 export function parse(output: string): ParsedError[] {
   return output

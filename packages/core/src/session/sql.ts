@@ -182,8 +182,7 @@ export const StudentErrorTable = sqliteTable(
     id: integer().primaryKey({ autoIncrement: true }),
     session_id: text()
       .$type<SessionSchema.ID>()
-      .notNull()
-      .references(() => SessionTable.id, { onDelete: "cascade" }),
+      .notNull(),
     category: text().notNull(),
     code: text(),
     message: text().notNull(),
