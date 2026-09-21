@@ -48,7 +48,11 @@ const layer = Layer.effect(
           source: input.source,
         })
         .run()
-        .pipe(Effect.orDie)
+        .pipe(
+        // changed the Effect.orDie to this to log a warning instead of crashing because I want to call parse to make it automatic.
+            Effect.tapError((error) => Effect.logWarning("Failed to record student error", error)),
+            Effect.ignore,
+        )
     })
  
     // returns a list of errors for a given session, ordered by id
