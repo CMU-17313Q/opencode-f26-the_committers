@@ -5,6 +5,9 @@ import { ModelV2 } from "../../model"
 import { SessionEvent } from "../event"
 import { SessionMessage } from "../message"
 import { SessionSchema } from "../schema"
+// Add these imports to call parser and record student errors automatically
+import { SessionStudentError } from "../student-error"
+import { StudentErrorParser } from "../student-error-parser"
 
 type Input = {
   readonly sessionID: SessionSchema.ID
@@ -51,7 +54,10 @@ const settledOutput = (value: ToolOutput | undefined, result: ToolResultValue): 
 }
 
 /** Persist one provider turn without executing tools or starting a continuation turn. */
-export const createLLMEventPublisher = (events: EventV2.Interface, input: Input) => {
+export const createLLMEventPublisher = (events: EventV2.Interface, input: Input,
+  // Added the optional studentErrors parameter to the function
+  studentErrors?: SessionStudentError.Interface,
+) => {
   const tools = new Map<
     string,
     {
@@ -371,6 +377,13 @@ export const createLLMEventPublisher = (events: EventV2.Interface, input: Input)
           ...(provider.executed ? { result: event.result } : {}),
           provider,
         })
+        // Call the parser and record student errors automatically if the tool is bash
+           if (studentErrors && tool.name === "bash") {
+             const output = result.content.flatMap((piece) => (piece.type === "text" ? [piece.text] : [])).join("\n")
+             yield* Effect.forEach(StudentErrorParser.parse(output), (error) =>
+               studentErrors.record({ sessionID: input.sessionID, source: "bash", ...error }),
+             )
+           }
         return
       }
       case "tool-error": {
