@@ -1,9 +1,10 @@
 export * as SessionStudentError from "./student-error"
 
-import { asc, eq } from "drizzle-orm"
+import { asc, eq, inArray } from "drizzle-orm"
 import { Context, Effect, Layer } from "effect"
 import { Database } from "../database/database"
 import { makeLocationNode } from "../effect/app-node"
+import { ProjectV2 } from "../project"
 import { SessionSchema } from "./schema"
 import { SessionTable, StudentErrorTable } from "./sql"
 
@@ -24,7 +25,7 @@ export interface Input {
 export interface Interface {
   readonly record: (input: Input) => Effect.Effect<void>
   readonly list: (sessionID: SessionSchema.ID) => Effect.Effect<ReadonlyArray<Row>>
-  readonly listForProject: (projectID: string) => Effect.Effect<ReadonlyArray<Row>>
+  readonly listForProject: (projectID: ProjectV2.ID) => Effect.Effect<ReadonlyArray<Row>>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/v2/SessionStudentError") {}
@@ -35,7 +36,7 @@ const layer = Layer.effect(
   Effect.gen(function* () {
     const { db } = yield* Database.Service
 
-    // this is where values are icluded into the db
+    // this is where values are included into the db
     const record = Effect.fn("SessionStudentError.record")(function* (input: Input) {
       yield* db
         .insert(StudentErrorTable)
@@ -50,7 +51,7 @@ const layer = Layer.effect(
         })
         .run()
         .pipe(
-          // changed the Effect.orDie to this to log a warning instead of crashing because I want to call parse to make it automatic.
+          // log a warning instead of crashing when recording fails
           Effect.tapError((error) => Effect.logWarning("Failed to record student error", error)),
           Effect.ignore,
         )
@@ -68,19 +69,29 @@ const layer = Layer.effect(
     })
 
     // returns a list of errors for all sessions belonging to a project
-    const listForProject = Effect.fn("SessionStudentError.listForProject")(function* (projectID: string) {
-      const rows = yield* db
-        .select({
-          studentError: StudentErrorTable,
-        })
-        .from(StudentErrorTable)
-        .innerJoin(SessionTable, eq(StudentErrorTable.session_id, SessionTable.id))
+    const listForProject = Effect.fn("SessionStudentError.listForProject")(function* (
+      projectID: ProjectV2.ID,
+    ) {
+      const sessions = yield* db
+        .select({ id: SessionTable.id })
+        .from(SessionTable)
         .where(eq(SessionTable.project_id, projectID))
-        .orderBy(asc(StudentErrorTable.id))
         .all()
         .pipe(Effect.orDie)
 
-      return rows.map((row) => row.studentError)
+      const sessionIDs = sessions.map((session) => session.id)
+
+      if (sessionIDs.length === 0) {
+        return []
+      }
+
+      return yield* db
+        .select()
+        .from(StudentErrorTable)
+        .where(inArray(StudentErrorTable.session_id, sessionIDs))
+        .orderBy(asc(StudentErrorTable.id))
+        .all()
+        .pipe(Effect.orDie)
     })
 
     return Service.of({ record, list, listForProject })
