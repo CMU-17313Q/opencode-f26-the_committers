@@ -46,6 +46,10 @@ export const MessagesQuery = Schema.Struct({
   before: Schema.optional(Schema.String),
 })
 export const StatusMap = Schema.Record(Schema.String, SessionStatus.Info)
+export const MistakesSummary = Schema.Struct({
+  project: Schema.String,
+  session: Schema.String,
+})
 export const UpdatePayload = Schema.Struct({
   title: Schema.optional(Schema.String),
   metadata: Schema.optional(Session.Metadata),
@@ -81,6 +85,7 @@ export const SessionPaths = {
   get: `${root}/:sessionID`,
   children: `${root}/:sessionID/children`,
   todo: `${root}/:sessionID/todo`,
+  mistakes: `${root}/:sessionID/mistakes`,
   diff: `${root}/:sessionID/diff`,
   messages: `${root}/:sessionID/message`,
   message: `${root}/:sessionID/message/:messageID`,
@@ -163,6 +168,19 @@ export const SessionApi = HttpApi.make("session")
             identifier: "session.todo",
             summary: "Get session todos",
             description: "Retrieve the todo list associated with a specific session, showing tasks and action items.",
+          }),
+        ),
+        HttpApiEndpoint.get("mistakes", SessionPaths.mistakes, {
+          params: { sessionID: SessionID },
+          query: WorkspaceRoutingQuery,
+          success: described(MistakesSummary, "Recurring mistake summaries"),
+          error: [HttpApiError.BadRequest, ApiNotFoundError],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "session.mistakes",
+            summary: "Get mistake patterns",
+            description:
+              "Summarize the student's recurring mistake patterns across the session's project and within the session itself.",
           }),
         ),
         HttpApiEndpoint.get("diff", SessionPaths.diff, {

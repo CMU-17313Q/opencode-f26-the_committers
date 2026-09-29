@@ -9721,6 +9721,43 @@ export type SessionTodoResponses = {
 
 export type SessionTodoResponse = SessionTodoResponses[keyof SessionTodoResponses]
 
+export type SessionMistakesData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/session/{sessionID}/mistakes"
+}
+
+export type SessionMistakesErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * NotFoundError
+   */
+  404: NotFoundError
+}
+
+export type SessionMistakesError = SessionMistakesErrors[keyof SessionMistakesErrors]
+
+export type SessionMistakesResponses = {
+  /**
+   * Recurring mistake summaries
+   */
+  200: {
+    project: string
+    session: string
+  }
+}
+
+export type SessionMistakesResponse = SessionMistakesResponses[keyof SessionMistakesResponses]
+
 export type SessionDiffData = {
   body?: never
   path: {

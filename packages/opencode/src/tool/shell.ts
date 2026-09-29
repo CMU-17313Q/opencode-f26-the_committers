@@ -13,6 +13,8 @@ import { fileURLToPath } from "url"
 import { Config } from "@/config/config"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Shell } from "@opencode-ai/core/shell"
+import { SessionStudentError } from "@opencode-ai/core/session/student-error"
+import { StudentErrorParser } from "@opencode-ai/core/session/student-error-parser"
 import { ShellID } from "./shell/id"
 
 import * as Truncate from "./truncate"
@@ -344,6 +346,7 @@ export const ShellTool = Tool.define(
     const trunc = yield* Truncate.Service
     const plugin = yield* Plugin.Service
     const flags = yield* RuntimeFlags.Service
+    const studentErrors = yield* SessionStudentError.Service
     const defaultTimeoutMs = flags.bashDefaultTimeoutMs ?? 2 * 60 * 1000
 
     const cygpath = Effect.fn("ShellTool.cygpath")(function* (shell: string, text: string) {
@@ -628,7 +631,7 @@ export const ShellTool = Tool.define(
                 }),
               )
 
-              return yield* run(
+              const result = yield* run(
                 {
                   shell,
                   command: params.command,
@@ -638,6 +641,11 @@ export const ShellTool = Tool.define(
                 },
                 ctx,
               )
+              // mirrors the V2 runner (publish-llm-event.ts) so legacy chat sessions also build a mistake history
+              yield* Effect.forEach(StudentErrorParser.parse(result.output), (error) =>
+                studentErrors.record({ sessionID: ctx.sessionID, source: ShellID.ToolID, ...error }),
+              )
+              return result
             }),
         }
       })
