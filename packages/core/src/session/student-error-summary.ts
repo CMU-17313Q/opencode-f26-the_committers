@@ -34,6 +34,12 @@ export function summarize(history: ReadonlyArray<Row>): string {
   return `You've had ${top.slice(0, -1).join(", ")}, and ${top.at(-1)}.`
 }
 
+// summarize() can't tell an empty history apart from one with only one-off mistakes
+export function report(history: ReadonlyArray<Row>): string {
+  if (history.length === 0) return "No mistakes recorded yet."
+  return summarize(history)
+}
+
 function describe(pattern: Pattern): string {
   const code = pattern.example.code ? ` (${pattern.example.code})` : ""
   return `${pattern.count} ${label(pattern.example.category)}${code}`

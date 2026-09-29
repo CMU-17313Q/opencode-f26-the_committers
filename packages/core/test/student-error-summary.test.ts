@@ -174,4 +174,14 @@ describe("StudentErrorSummary", () => {
 
     expect(history).toEqual(original)
   })
+
+  test("report tells an empty history apart from one without patterns", () => {
+    expect(StudentErrorSummary.report([])).toBe("No mistakes recorded yet.")
+    expect(StudentErrorSummary.report([row({ category: "syntax_error", code: "TS1005" })])).toBe(
+      "No recurring mistake patterns found.",
+    )
+    expect(StudentErrorSummary.report(repeat(2, { category: "undefined_name", code: "TS2304" }))).toBe(
+      "You've had 2 undefined name errors (TS2304).",
+    )
+  })
 })
