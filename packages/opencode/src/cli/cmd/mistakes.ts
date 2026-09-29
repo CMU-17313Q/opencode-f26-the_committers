@@ -25,7 +25,6 @@ export const MistakesCommand = effectCmd({
     const scope = args.session ? `session ${args.session}` : "this project"
 
     console.log(UI.Style.TEXT_NORMAL_BOLD + `Mistake patterns for ${scope}` + UI.Style.TEXT_NORMAL)
-    // summarize() can't tell an empty history apart from one with only one-off mistakes
-    console.log(history.length === 0 ? "No mistakes recorded yet." : StudentErrorSummary.summarize(history))
+    console.log(StudentErrorSummary.report(history))
   }),
 })

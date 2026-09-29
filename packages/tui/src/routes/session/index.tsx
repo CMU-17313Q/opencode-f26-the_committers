@@ -586,6 +586,32 @@ export function Session() {
       },
     },
     {
+      title: "Show mistake patterns",
+      value: "session.mistakes",
+      category: "Session",
+      slash: {
+        name: "mistakes",
+      },
+      run: async () => {
+        await sdk.client.session
+          .mistakes({ sessionID: route.sessionID }, { throwOnError: true })
+          .then((res) =>
+            DialogAlert.show(
+              dialog,
+              "Mistake patterns",
+              `This project: ${res.data.project}\n\nThis session: ${res.data.session}`,
+            ),
+          )
+          .catch((error) => {
+            toast.show({
+              message: error instanceof Error ? error.message : "Failed to load mistake patterns",
+              variant: "error",
+            })
+            dialog.clear()
+          })
+      },
+    },
+    {
       title: "Unshare session",
       value: "session.unshare",
       category: "Session",
