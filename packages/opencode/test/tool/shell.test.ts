@@ -21,6 +21,7 @@ import { testEffect } from "../lib/effect"
 import { Tool } from "@/tool/tool"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { InstanceStore } from "@/project/instance-store"
+import { SessionStudentError } from "@opencode-ai/core/session/student-error"
 
 const shellLayer = Layer.mergeAll(
   LayerNode.compile(
@@ -32,6 +33,7 @@ const shellLayer = Layer.mergeAll(
       Config.node,
       Agent.node,
       RuntimeFlags.node,
+      SessionStudentError.node,
     ]),
   ),
   testInstanceStoreLayer,
@@ -190,6 +192,24 @@ describe("tool.shell", () => {
         })
         expect(result.metadata.exit).toBe(0)
         expect(result.metadata.output).toContain("test")
+      }),
+    ),
+  )
+
+  it.live("records compiler errors from command output as student mistakes", () =>
+    runIn(
+      projectRoot,
+      Effect.gen(function* () {
+        const studentErrors = yield* SessionStudentError.Service
+        const next = { ...ctx, sessionID: SessionID.descending() }
+
+        yield* run({ command: "echo clean" }, next)
+        expect(yield* studentErrors.list(next.sessionID)).toEqual([])
+
+        yield* run({ command: `echo "d.ts(1,13): error TS2304: Cannot find name coutn."` }, next)
+        expect(yield* studentErrors.list(next.sessionID)).toMatchObject([
+          { category: "undefined_name", code: "TS2304", file: "d.ts", line: 1, source: "bash" },
+        ])
       }),
     ),
   )
