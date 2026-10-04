@@ -46,6 +46,7 @@ export function hints(template: string) {
 export const Default = {
   INIT: "init",
   REVIEW: "review",
+  SUGGEST_TESTS: "suggest-tests",
 } as const
 
 export interface Interface {
@@ -86,7 +87,13 @@ const layer = Layer.effect(
         subtask: true,
         hints: hints(PROMPT_REVIEW),
       }
-
+      commands[Default.SUGGEST_TESTS] = {
+        name: Default.SUGGEST_TESTS,
+        description: "suggest test cases for <file> [function]",
+        source: "command",
+        template: "Suggest test cases for the following file and optional function: $ARGUMENTS",
+        hints: hints("$ARGUMENTS"),
+      }
       for (const [name, command] of Object.entries(cfg.command ?? {})) {
         commands[name] = {
           name,

@@ -56,6 +56,7 @@ import { SessionTable } from "@opencode-ai/core/session/sql"
 import { SessionReminders } from "./reminders"
 import { SessionTools } from "./tools"
 import { LLMEvent } from "@opencode-ai/llm"
+import { SuggestTests } from "../command/suggest-tests"
 
 // @ts-ignore
 globalThis.AI_SDK_LOG_WARNINGS = false
@@ -1371,6 +1372,21 @@ const layer = Layer.effect(
 
       const raw = input.arguments.match(argsRegex) ?? []
       const args = raw.map((arg) => arg.replace(quoteTrimRegex, ""))
+      if (input.command === Command.Default.SUGGEST_TESTS) {
+        const ctx = yield* InstanceState.context
+        const result = yield* SuggestTests.validate(args, ctx.directory).pipe(
+          Effect.provideService(FSUtil.Service, fsys),
+        )
+
+        if (!result.ok) {
+          const error = new NamedError.Unknown({ message: result.message })
+          yield* events.publish(Session.Event.Error, {
+            sessionID: input.sessionID,
+            error: error.toObject(),
+          })
+          throw error
+        }
+      }
       const templateCommand = yield* Effect.promise(async () => cmd.template)
 
       const placeholders = templateCommand.match(placeholderRegex) ?? []
