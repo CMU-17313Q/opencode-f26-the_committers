@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { extractFunctionSignature } from "../../src/command/signature"
 import { ExpectedCases } from "../../src/command/expected-cases"
+import { ExpectedOutput } from "../../src/command/expected-output"
 
 function signatureFor(source: string, functionName?: string) {
   const result = extractFunctionSignature(source, functionName)
@@ -74,7 +75,7 @@ describe("ExpectedCases.generate", () => {
     expect(suggestions.map((suggestion) => suggestion.input)).toEqual([[null], [null]])
   })
 
-  test("leaves expectedOutput as an explicit placeholder with a non-empty reason", () => {
+  test("derives expectedOutput from the function body, with a non-empty reason", () => {
     const signature = signatureFor(`
       function add(a: number, b: number): number {
         return a + b
@@ -83,7 +84,20 @@ describe("ExpectedCases.generate", () => {
 
     const suggestions = ExpectedCases.generate(signature)
 
-    expect(suggestions.every((suggestion) => suggestion.expectedOutput === null)).toBe(true)
+    expect(suggestions.map((suggestion) => suggestion.expectedOutput)).toEqual([17, 17])
     expect(suggestions.every((suggestion) => suggestion.reason.length > 0)).toBe(true)
+  })
+
+  test("falls back to the unknown marker when the body does not determine the output", () => {
+    const signature = signatureFor(`
+      function process(item: CustomType): void {}
+    `)
+
+    const suggestions = ExpectedCases.generate(signature)
+
+    expect(suggestions.map((suggestion) => suggestion.expectedOutput)).toEqual([
+      ExpectedOutput.UNKNOWN,
+      ExpectedOutput.UNKNOWN,
+    ])
   })
 })
