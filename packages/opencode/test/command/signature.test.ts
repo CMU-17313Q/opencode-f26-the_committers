@@ -15,6 +15,9 @@ describe("extractFunctionSignature", () => {
         name: "getName",
         parameters: [],
         returnType: "string",
+        body: `{
+        return "Alice"
+      }`,
       },
     })
   })
@@ -43,6 +46,9 @@ describe("extractFunctionSignature", () => {
           },
         ],
         returnType: "number",
+        body: `{
+        return a + b
+      }`,
       },
     })
   })
@@ -66,6 +72,9 @@ describe("extractFunctionSignature", () => {
           },
         ],
         returnType: "string",
+        body: `{
+        return name ?? "Guest"
+      }`,
       },
     })
   })
@@ -103,6 +112,37 @@ describe("extractFunctionSignature", () => {
           },
         ],
         returnType: "number",
+        body: `{
+        return value
+      }`,
+      },
+    })
+  })
+
+  test("captures a multi-statement body as written", () => {
+    const source = `function clamp(value: number, max: number): number {
+  if (value > max) return max
+  return value
+}`
+
+    const result = extractFunctionSignature(source)
+
+    expect(result.ok && result.signature.body).toBe(`{
+  if (value > max) return max
+  return value
+}`)
+  })
+
+  test("returns an empty body for a declaration without one", () => {
+    const source = `declare function parse(input: string): number`
+
+    expect(extractFunctionSignature(source)).toEqual({
+      ok: true,
+      signature: {
+        name: "parse",
+        parameters: [{ name: "input", type: "string", optional: false }],
+        returnType: "number",
+        body: "",
       },
     })
   })
