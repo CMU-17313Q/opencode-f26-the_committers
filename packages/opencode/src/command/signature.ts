@@ -10,6 +10,8 @@ export type FunctionSignature = {
   name: string
   parameters: FunctionParameter[]
   returnType: string
+  // source text of the body including braces, or "" for a declaration without one (overload, `declare function`)
+  body: string
 }
 
 export type Result =
@@ -46,6 +48,7 @@ export function extractFunctionSignature(
               optional: parameter.questionToken !== undefined,
             })),
             returnType: node.type?.getText(sourceFile) ?? "unknown",
+            body: node.body?.getText(sourceFile) ?? "",
           }
           return
         }
