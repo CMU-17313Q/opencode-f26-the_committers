@@ -12,14 +12,17 @@ const MATH = new Set(["abs", "ceil", "floor", "max", "min", "pow", "round", "sig
 
 // what calling the function with `input` returns, worked out from its body;
 // an argument missing from `input` is treated as omitted (undefined)
-export function derive(signature: FunctionSignature, input: readonly Json[]): Json {
+export function derive(
+  signature: FunctionSignature,
+  input: readonly Json[],
+): { expectedOutput: Json; throws: boolean } {
   const body = parseBody(signature.body)
-  if (!body) return UNKNOWN
+  if (!body) return { expectedOutput: UNKNOWN, throws: false }
   const outcome = run(body, new Map(signature.parameters.map((parameter, index) => [parameter.name, input[index]])))
-  if (!outcome) return UNKNOWN
+  if (!outcome) return { expectedOutput: UNKNOWN, throws: false }
   // follows the shared mock: an expected throw is described by the error's name
-  if ("throws" in outcome) return outcome.throws
-  return isJson(outcome.value) ? outcome.value : UNKNOWN
+  if ("throws" in outcome) return { expectedOutput: outcome.throws, throws: true }
+  return { expectedOutput: isJson(outcome.value) ? outcome.value : UNKNOWN, throws: false }
 }
 
 function parseBody(body: string) {

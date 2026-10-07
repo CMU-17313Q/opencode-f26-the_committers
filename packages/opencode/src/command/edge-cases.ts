@@ -46,11 +46,13 @@ export function generate(signature: FunctionSignature): TestSuggestion[] {
       const input = edge.omitted
         ? baseline.slice(0, index)
         : baseline.map((value, position) => (position === index ? edge.value : value))
+      const derived = ExpectedOutput.derive(signature, input)
       return {
         functionName: signature.name,
-        category: "edge" as const,
+        // an input the function rejects with a throw is an error case, which the formatter asserts with toThrow()
+        category: derived.throws ? ("error" as const) : ("edge" as const),
         input,
-        expectedOutput: ExpectedOutput.derive(signature, input),
+        expectedOutput: derived.expectedOutput,
         reason: `${parameter.name}: ${edge.reason}`,
       }
     }),
