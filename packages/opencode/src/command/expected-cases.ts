@@ -1,7 +1,6 @@
 import type { TestSuggestion } from "@opencode-ai/schema/test-suggestion"
+import { ExpectedOutput } from "./expected-output"
 import type { FunctionSignature } from "./signature"
-
-const UNKNOWN_OUTPUT = null
 
 // Two typical values per primitive type, so a function gets two different example calls
 // instead of the same input twice. A parameter type outside this map falls back to null.
@@ -28,14 +27,19 @@ export function generate(signature: FunctionSignature): TestSuggestion[] {
   // suggestion is returned instead of two identical ones.
   const variants: ReadonlyArray<0 | 1> = signature.parameters.length === 0 ? [0] : [0, 1]
 
-  return variants.map((variant) => ({
-    functionName: signature.name,
-    category: "expected",
+  return variants.map((variant) => {
     // Offsetting by parameter index keeps multi-parameter calls from reusing the exact same typical value in every position
-    input: signature.parameters.map((parameter, index) => typicalValue(parameter.type, ((variant + index) % 2) as 0 | 1)),
-    expectedOutput: UNKNOWN_OUTPUT,
-    reason: REASONS[variant],
-  }))
+    const input = signature.parameters.map((parameter, index) => typicalValue(parameter.type, ((variant + index) % 2) as 0 | 1))
+    const derived = ExpectedOutput.derive(signature, input)
+    return {
+      functionName: signature.name,
+      // an input the function rejects with a throw is an error case, which the formatter asserts with toThrow()
+      category: derived.throws ? ("error" as const) : ("expected" as const),
+      input,
+      expectedOutput: derived.expectedOutput,
+      reason: REASONS[variant],
+    }
+  })
 }
 
 export * as ExpectedCases from "./expected-cases"

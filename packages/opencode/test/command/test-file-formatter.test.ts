@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test"
 import type { TestSuggestion } from "@opencode-ai/schema/test-suggestion"
+import path from "path"
+import { EdgeCases } from "../../src/command/edge-cases"
+import { ExpectedCases } from "../../src/command/expected-cases"
+import { ExpectedOutput } from "../../src/command/expected-output"
+import { extractFunctionSignature } from "../../src/command/signature"
 import { format } from "../../src/command/test-file-formatter"
+import { tmpdir } from "../fixture/fixture"
 
 const suggestion = (overrides: Partial<TestSuggestion> = {}): TestSuggestion => ({
   functionName: "add",
@@ -70,7 +76,7 @@ describe("test-file-formatter", () => {
     const result = format(
       [
         suggestion({
-          expectedOutput: "Unknown: could not be derived from the function body, check manually",
+          expectedOutput: ExpectedOutput.UNKNOWN,
         }),
       ],
       {
@@ -79,7 +85,7 @@ describe("test-file-formatter", () => {
     )
 
     expect(result).toContain("Expected output could not be derived automatically.")
-    expect(result).toContain("expect(add(2, 3)).toBeDefined()")
+    expect(result).toContain("expect(() => add(2, 3)).not.toThrow()")
   })
 
   test("formats error suggestions as throwing tests", () => {
@@ -106,5 +112,42 @@ describe("test-file-formatter", () => {
 
     expect(result).toContain('test.skip("No test suggestions were generated", () => {})')
     expect(result).toContain('import { describe, test } from "bun:test"')
+  })
+
+  // runs the generated file the way a student would, against correct implementations,
+  // so a suggestion the formatter turns into a failing assertion is caught here
+  test("generated test files pass against correct functions", async () => {
+    await using tmp = await tmpdir()
+    const source = `export function add(a: number, b: number): number {
+  return a + b
+}
+
+export function divide(a: number, b: number): number {
+  if (b === 0) throw new Error("cannot divide by zero")
+  return a / b
+}
+
+export function log(message: string): void {
+  console.log(message)
+}
+`
+    await Bun.write(path.join(tmp.path, "src/math.ts"), source)
+
+    for (const name of ["add", "divide", "log"]) {
+      const extracted = extractFunctionSignature(source, name)
+      if (!extracted.ok) throw new Error(extracted.message)
+      const suggestions = [...ExpectedCases.generate(extracted.signature), ...EdgeCases.generate(extracted.signature)]
+      await Bun.write(
+        path.join(tmp.path, `test/generated/${name}.test.ts`),
+        format(suggestions, { importPath: "../../src/math" }),
+      )
+    }
+
+    const run = Bun.spawnSync(["bun", "test", "test/generated"], { cwd: tmp.path, stderr: "pipe" })
+    const output = run.stderr.toString()
+
+    expect(output).toContain(" 26 pass")
+    expect(output).toContain(" 0 fail")
+    expect(run.exitCode).toBe(0)
   })
 })
