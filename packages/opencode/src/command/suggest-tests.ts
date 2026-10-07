@@ -14,12 +14,7 @@ export type Result =
   | {
       ok: true
       input: Input
-      suggestions: ReturnType<typeof generateSuggestions> extends {
-        ok: true
-        suggestions: infer Suggestions
-      }
-        ? Suggestions
-        : never
+      suggestions: ReturnType<typeof ExpectedCases.generate>
     }
   | { ok: false; message: string }
 
@@ -71,7 +66,7 @@ export const validate = Effect.fn("SuggestTests.validate")(function* (
     } satisfies Result
   }
 
-  const source = yield* fs.readFileString(file)
+  const source = yield* fs.readFileString(file).pipe(Effect.orDie)
   const generated = generateSuggestions(source, args[1])
 
   if (!generated.ok) {

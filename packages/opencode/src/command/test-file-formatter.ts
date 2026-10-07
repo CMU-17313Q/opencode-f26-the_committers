@@ -70,7 +70,8 @@ function formatSuggestion(
 }
 
 function call(suggestion: TestSuggestion): string {
-  return `${suggestion.functionName}(${suggestion.input.map(serialize).join(", ")})`
+  const input = Array.isArray(suggestion.input) ? suggestion.input : [suggestion.input]
+  return `${suggestion.functionName}(${input.map(serialize).join(", ")})`
 }
 
 function serialize(value: unknown): string {
