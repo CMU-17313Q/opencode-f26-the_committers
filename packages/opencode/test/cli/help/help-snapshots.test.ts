@@ -61,6 +61,7 @@ const TOP_LEVEL = [
   "github",
   "pr",
   "session",
+  "mistakes",
   "plugin",
   "db",
 ] as const

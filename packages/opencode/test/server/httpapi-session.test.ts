@@ -26,7 +26,7 @@ import { SessionPaths } from "../../src/server/routes/instance/httpapi/groups/se
 import { Session } from "@/session/session"
 import { MessageID, PartID, SessionID, type SessionID as SessionIDType } from "../../src/session/schema"
 import { Database } from "@opencode-ai/core/database/database"
-import { SessionInputTable, SessionMessageTable, SessionTable } from "@opencode-ai/core/session/sql"
+import { SessionInputTable, SessionMessageTable, SessionTable, StudentErrorTable } from "@opencode-ai/core/session/sql"
 import { SessionMessage } from "@opencode-ai/core/session/message"
 import { ModelV2 } from "@opencode-ai/core/model"
 import { ProviderV2 } from "@opencode-ai/core/provider"
@@ -314,6 +314,60 @@ describe("session HttpApi", () => {
         })
       }),
     { git: true, config: { formatter: false, lsp: false } },
+  )
+
+  it.instance("summarizes mistake patterns for the project and the session", () =>
+    Effect.gen(function* () {
+      const test = yield* TestInstance
+      const headers = { "x-opencode-directory": test.directory }
+      const first = yield* createSession({ title: "first" })
+      const second = yield* createSession({ title: "second" })
+      const empty = yield* createSession({ title: "empty" })
+      yield* Database.Service.use(({ db }) =>
+        db
+          .insert(StudentErrorTable)
+          .values([
+            {
+              session_id: first.id,
+              category: "undefined_name",
+              code: "TS2304",
+              message: "Cannot find name 'coutn'.",
+              source: "bash",
+            },
+            {
+              session_id: first.id,
+              category: "syntax_error",
+              code: "TS1005",
+              message: "';' expected.",
+              source: "bash",
+            },
+            {
+              session_id: second.id,
+              category: "undefined_name",
+              code: "TS2304",
+              message: "Cannot find name 'widht'.",
+              source: "bash",
+            },
+          ])
+          .run()
+          .pipe(Effect.orDie),
+      )
+
+      // the project view spans sessions, so the two one-off TS2304s become a pattern
+      expect(yield* requestJson(pathFor(SessionPaths.mistakes, { sessionID: first.id }), { headers })).toEqual({
+        project: "You've had 2 undefined name errors (TS2304).",
+        session: "No recurring mistake patterns found.",
+      })
+      expect(yield* requestJson(pathFor(SessionPaths.mistakes, { sessionID: empty.id }), { headers })).toEqual({
+        project: "You've had 2 undefined name errors (TS2304).",
+        session: "No mistakes recorded yet.",
+      })
+
+      const missing = yield* request(pathFor(SessionPaths.mistakes, { sessionID: SessionID.descending() }), {
+        headers,
+      })
+      expect(missing.status).toBe(404)
+    }),
   )
 
   it.instance(
