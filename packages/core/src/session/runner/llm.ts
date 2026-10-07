@@ -39,6 +39,8 @@ import { MAX_STEPS_PROMPT } from "./max-steps"
 import { Snapshot } from "../../snapshot"
 import { makeLocationNode } from "../../effect/app-node"
 import { llmClient } from "../../effect/app-node-platform"
+// added these imports to call parser and record student errors automatically
+import { SessionStudentError } from "../student-error"
 
 /**
  * Runs one durable coding-agent Session until it settles.
@@ -106,6 +108,7 @@ const layer = Layer.effect(
     const config = yield* Config.Service
     const snapshots = yield* Snapshot.Service
     const db = (yield* Database.Service).db
+    const studentErrors = yield* SessionStudentError.Service
     const compaction = SessionCompaction.make({ events, llm, config: yield* config.entries() })
     const getSession = Effect.fn("SessionRunner.getSession")(function* (sessionID: SessionSchema.ID) {
       const session = yield* store.get(sessionID)
@@ -223,8 +226,9 @@ const layer = Layer.effect(
           providerID: ProviderV2.ID.make(model.provider),
           ...(session.model?.variant === undefined ? {} : { variant: session.model.variant }),
         },
+        // changed this line of code to include studentErrors.
         snapshot: startSnapshot,
-      })
+      }, studentErrors)
       const withPublication = Semaphore.makeUnsafe(1).withPermit
       const publish = (event: LLMEvent, outputPaths: ReadonlyArray<string> = []) =>
         withPublication(publisher.publish(event, outputPaths))
@@ -428,5 +432,7 @@ export const node = makeLocationNode({
     Config.node,
     Snapshot.node,
     Database.node,
+    // added this dependency to the node so that the publisher recives record.
+    SessionStudentError.node, 
   ],
 })
