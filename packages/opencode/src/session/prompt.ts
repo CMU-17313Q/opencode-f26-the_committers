@@ -57,6 +57,7 @@ import { SessionReminders } from "./reminders"
 import { SessionTools } from "./tools"
 import { LLMEvent } from "@opencode-ai/llm"
 import { SuggestTests } from "../command/suggest-tests"
+import { format as formatTestFile } from "../command/test-file-formatter"
 
 // @ts-ignore
 globalThis.AI_SDK_LOG_WARNINGS = false
@@ -1372,6 +1373,8 @@ const layer = Layer.effect(
 
       const raw = input.arguments.match(argsRegex) ?? []
       const args = raw.map((arg) => arg.replace(quoteTrimRegex, ""))
+      let suggestTestsOutput: string | undefined
+
       if (input.command === Command.Default.SUGGEST_TESTS) {
         const ctx = yield* InstanceState.context
         const result = yield* SuggestTests.validate(args, ctx.directory).pipe(
@@ -1386,7 +1389,28 @@ const layer = Layer.effect(
           })
           throw error
         }
+
+        const sourceFile = result.input.file
+        const functionName = result.input.functionName ?? result.suggestions[0]?.functionName
+
+        if (!functionName) {
+          const error = new NamedError.Unknown({
+            message: "Could not determine the function name for generated tests.",
+          })
+          yield* events.publish(Session.Event.Error, {
+            sessionID: input.sessionID,
+            error: error.toObject(),
+          })
+          throw error
+        }
+
+        const importPath = `../../src/${path.basename(sourceFile, path.extname(sourceFile))}`
+
+        suggestTestsOutput = formatTestFile(result.suggestions, {
+          importPath,
+        })
       }
+
       const templateCommand = yield* Effect.promise(async () => cmd.template)
 
       const placeholders = templateCommand.match(placeholderRegex) ?? []
@@ -1406,7 +1430,11 @@ const layer = Layer.effect(
       const usesArgumentsPlaceholder = templateCommand.includes("$ARGUMENTS")
       let template = withArgs.replaceAll("$ARGUMENTS", input.arguments)
 
-      if (placeholders.length === 0 && !usesArgumentsPlaceholder && input.arguments.trim()) {
+      if (suggestTestsOutput) {
+        template = suggestTestsOutput
+      }
+
+      if (!suggestTestsOutput && placeholders.length === 0 && !usesArgumentsPlaceholder && input.arguments.trim()) {
         template = template + "\n\n" + input.arguments
       }
 
