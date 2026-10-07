@@ -1,10 +1,9 @@
 import type { TestSuggestion } from "@opencode-ai/schema/test-suggestion"
+import { ExpectedOutput } from "./expected-output"
 
 export type FormatOptions = {
   importPath: string
 }
-
-const UNKNOWN_OUTPUT = "Unknown: could not be derived from the function body, check manually"
 
 export function format(
   suggestions: readonly TestSuggestion[],
@@ -52,12 +51,13 @@ function formatSuggestion(
     ].join("\n")
   }
 
-  if (suggestion.expectedOutput === UNKNOWN_OUTPUT) {
+  if (suggestion.expectedOutput === ExpectedOutput.UNKNOWN) {
     return [
       `test(${JSON.stringify(`${index + 1}. ${title}`)}, () => {`,
       "  // Expected output could not be derived automatically.",
       `  // Reason: ${escapeComment(suggestion.reason)}`,
-      `  expect(${call(suggestion)}).toBeDefined()`,
+      // only checks the call runs: toBeDefined() would fail every function that returns nothing
+      `  expect(() => ${call(suggestion)}).not.toThrow()`,
       "})",
     ].join("\n")
   }

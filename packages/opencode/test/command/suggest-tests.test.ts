@@ -108,7 +108,7 @@ describe("SuggestTests.validate", () => {
 
       yield* fs.writeFileString(
         file,
-        "export function add(a: number, b: number): number {\\n  return a + b\\n}\\n",
+        "export function add(a: number, b: number): number {\n  return a + b\n}\n",
       )
 
       const result = yield* SuggestTests.validate(
@@ -135,9 +135,10 @@ describe("SuggestTests.validate", () => {
         'import { add } from "../../src/calculator"',
       )
       expect(output).toContain('describe("add", () => {')
-      expect(output).toContain("expect(add(")
-      expect(output).toContain(").toBeDefined()")
-      expect(output).toContain(
+      // expected outputs come from the function body, so no test falls back to the unknown marker
+      expect(output).toContain("expect(add(5, 12)).toEqual(17)")
+      expect(output).toContain("expect(add(0, 5)).toEqual(5)")
+      expect(output).not.toContain(
         "Expected output could not be derived automatically.",
       )
     }),
