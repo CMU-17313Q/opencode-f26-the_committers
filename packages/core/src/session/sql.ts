@@ -174,3 +174,26 @@ export const SessionContextEpochTable = sqliteTable("session_context_epoch", {
   snapshot: text({ mode: "json" }).notNull().$type<SystemContext.Snapshot>(),
   baseline_seq: integer().notNull(),
 })
+
+// Added a Student Error table to store errors encountered by students during sessions. 
+export const StudentErrorTable = sqliteTable(
+  "student_error", 
+  {
+    id: integer().primaryKey({ autoIncrement: true }),
+    session_id: text()
+      .$type<SessionSchema.ID>()
+      .notNull(),
+    category: text().notNull(),
+    code: text(),
+    message: text().notNull(),
+    file: text(),
+    line: integer(),
+    source: text().notNull(),
+    time_created: integer()
+      .notNull()
+      .$default(() => Date.now()),
+  },
+  (table) => [
+    index("student_error_session_idx").on(table.session_id),
+    index("student_error_category_idx").on(table.category),
+  ],)

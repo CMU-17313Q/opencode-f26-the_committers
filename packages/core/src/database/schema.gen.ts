@@ -213,6 +213,19 @@ export default {
         );
       `)
       yield* tx.run(`
+        CREATE TABLE \`student_error\` (
+          \`id\` integer PRIMARY KEY AUTOINCREMENT,
+          \`session_id\` text NOT NULL,
+          \`category\` text NOT NULL,
+          \`code\` text,
+          \`message\` text NOT NULL,
+          \`file\` text,
+          \`line\` integer,
+          \`source\` text NOT NULL,
+          \`time_created\` integer NOT NULL
+        );
+      `)
+      yield* tx.run(`
         CREATE TABLE \`todo\` (
           \`session_id\` text NOT NULL,
           \`content\` text NOT NULL,
@@ -268,6 +281,8 @@ export default {
       yield* tx.run(`CREATE INDEX \`session_project_idx\` ON \`session\` (\`project_id\`);`)
       yield* tx.run(`CREATE INDEX \`session_workspace_idx\` ON \`session\` (\`workspace_id\`);`)
       yield* tx.run(`CREATE INDEX \`session_parent_idx\` ON \`session\` (\`parent_id\`);`)
+      yield* tx.run(`CREATE INDEX \`student_error_session_idx\` ON \`student_error\` (\`session_id\`);`)
+      yield* tx.run(`CREATE INDEX \`student_error_category_idx\` ON \`student_error\` (\`category\`);`)
       yield* tx.run(`CREATE INDEX \`todo_session_idx\` ON \`todo\` (\`session_id\`);`)
     })
   },

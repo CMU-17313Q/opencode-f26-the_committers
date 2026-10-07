@@ -110,6 +110,22 @@ describe("EdgeCases.generate", () => {
     expect(missing.map(([, output]) => output)).toEqual(Array(4).fill(ExpectedOutput.UNKNOWN))
   })
 
+  test("marks inputs the function throws for as error cases", () => {
+    const suggestions = EdgeCases.generate(
+      signatureFor(`
+        function divide(a: number, b: number): number {
+          if (b === 0) throw new Error("cannot divide by zero")
+          return a / b
+        }
+      `),
+    )
+
+    expect(suggestions.filter((suggestion) => suggestion.category === "error")).toMatchObject([
+      { input: [5, 0], expectedOutput: "Error" },
+    ])
+    expect(suggestions.filter((suggestion) => suggestion.category === "edge")).toHaveLength(7)
+  })
+
   test("reports a TypeError when the body reads a property of null", () => {
     expect(
       cases(`
