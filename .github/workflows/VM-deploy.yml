@@ -1,0 +1,48 @@
+name: VM Deploy OpenCode
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_ADMIN }}
+          password: ${{ secrets.ADMIN_PASSWORD }}
+          # Building the image can take a few minutes; the action's default limit is 10m.
+          command_timeout: 30m
+          script: |
+            set -e
+            # Our clone lives in the home folder (~/opencode-f26-the_committers),
+            # not under ~/code/ as in the course template.
+            cd ~/${{ secrets.REPO_NAME }}
+            git pull origin main
+            # Build the new image first, so the old site stays up during the build.
+            # (Plain "docker compose up -d" would reuse the old image and not deploy new code.)
+            docker compose build
+            docker compose down
+            docker compose up -d
+            # Fail the run if OpenCode does not come back up.
+            for i in $(seq 1 30); do
+              if curl -fsS -o /dev/null http://127.0.0.1:4096/; then
+                echo "OpenCode is up"
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "OpenCode did not respond after 60 seconds"
+            docker compose logs --tail 50
+            exit 1
