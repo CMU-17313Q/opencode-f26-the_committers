@@ -1,0 +1,44 @@
+name: Actionlint
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: Actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Install Actionlint 1.7.12
+        run: |
+          curl -fL https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz -o "$RUNNER_TEMP/actionlint.tar.gz"
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -version
+
+      - name: Check workflow files
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/actionlint" -version | tee actionlint-results.txt
+          "$RUNNER_TEMP/actionlint" -color 2>&1 | tee -a actionlint-results.txt
+          echo "All workflow files passed Actionlint." | tee -a actionlint-results.txt
+
+      - name: Upload Actionlint results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: actionlint-results
+          path: actionlint-results.txt
+          if-no-files-found: warn
