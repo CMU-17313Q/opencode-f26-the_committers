@@ -1,0 +1,58 @@
+name: Retire.js
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # New advisories are published without any code change, so rescan weekly (Mondays 06:00 UTC)
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  retirejs:
+    name: Retire.js dependency scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      # Retire.js scans installed packages, so node_modules must exist first
+      - name: Setup Bun and install dependencies
+        uses: ./.github/actions/setup-bun
+
+      - name: Show Retire.js version
+        run: ./node_modules/.bin/retire --version
+
+      # Fails the job only on high/critical findings; lower severities are still printed
+      - name: Scan for vulnerable dependencies
+        run: |
+          set -o pipefail
+          bun run security:retire 2>&1 | tee retire-output.txt
+
+      # Full report of every finding at any severity, uploaded as a build artifact
+      - name: Generate JSON report
+        if: always()
+        run: ./node_modules/.bin/retire --path . --outputformat json --outputpath retire-report.json || true
+
+      - name: Upload Retire.js results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: retirejs-results
+          path: |
+            retire-output.txt
+            retire-report.json
+          if-no-files-found: warn
