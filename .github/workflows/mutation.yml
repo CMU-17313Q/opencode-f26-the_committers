@@ -1,0 +1,41 @@
+
+name: Mutation Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    name: Stryker Mutation Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Bun and install dependencies
+        uses: ./.github/actions/setup-bun
+
+      - name: Run Stryker mutation testing
+        working-directory: packages/opencode
+        run: bun run test:mutation
+        timeout-minutes: 10
+
+      - name: Upload mutation testing report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: stryker-mutation-report
+          path: packages/opencode/reports/mutation/
+          if-no-files-found: warn
+          retention-days: 7
+
+
+
