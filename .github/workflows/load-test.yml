@@ -1,0 +1,74 @@
+name: k6 load test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  k6:
+    name: k6 load test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Start opencode server
+        run: |
+          mkdir -p load-test/results
+          nohup bun run --cwd packages/opencode --conditions=browser src/index.ts \
+            serve --hostname 127.0.0.1 --port 4096 > load-test/results/server.log 2>&1 &
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4096/global/health; then
+              echo
+              echo "opencode server is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "opencode server did not start within 120 seconds"
+          cat load-test/results/server.log
+          exit 1
+
+      - name: Warm up the project
+        # The first project-scoped request loads the project; do it once before the test.
+        run: |
+          curl -fsS -o /dev/null -H "x-opencode-directory: $GITHUB_WORKSPACE" http://127.0.0.1:4096/command
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@v1
+        with:
+          k6-version: "1.8.0"
+
+      - name: Run k6 load test
+        env:
+          BASE_URL: http://127.0.0.1:4096
+          PROJECT_DIR: ${{ github.workspace }}
+        run: |
+          k6 version | tee load-test/results/k6-output.txt
+          k6 run --summary-export load-test/results/k6-summary.json load-test/opencode-load.js \
+            | tee -a load-test/results/k6-output.txt
+
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: k6-load-test-results
+          path: load-test/results/
+          if-no-files-found: warn
