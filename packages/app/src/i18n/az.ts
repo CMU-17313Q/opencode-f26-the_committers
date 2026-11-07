@@ -182,6 +182,8 @@ export const dict = {
   "command.session.unshare.description": "Bu sessiyanın paylaşımını dayandır",
   "command.session.export": "Sessiyanı ixrac et",
   "command.session.export.description": "Sessiyanın tam transkriptini JSON formatında ixrac et",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Fayl, əmr və sessiya axtar",
   "palette.search.placeholder.home": "Əmr və sessiyaları axtar",
@@ -627,6 +629,10 @@ export const dict = {
   "toast.session.export.success.description": "Sessiya {{filename}} faylına saxlanıldı",
   "toast.session.export.failed.title": "Sessiya ixrac edilə bilmədi",
   "toast.session.export.failed.description": "Sessiyanı ixrac edərkən xəta baş verdi",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "{{project}} üçün sessiyalar yüklənə bilmədi",
   "toast.project.reloadFailed.title": "{{project}} yenidən yüklənə bilmədi",

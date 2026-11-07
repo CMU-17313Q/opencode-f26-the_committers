@@ -187,6 +187,8 @@ export const dict = {
   "command.session.unshare.description": "Dừng chia sẻ phiên này",
   "command.session.export": "Xuất phiên",
   "command.session.export.description": "Xuất toàn bộ bản ghi phiên dưới dạng JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Tìm kiếm tệp, lệnh và phiên",
   "palette.search.placeholder.home": "Tìm kiếm lệnh và phiên",
@@ -630,6 +632,10 @@ export const dict = {
   "toast.session.export.success.description": "Đã lưu phiên vào {{filename}}",
   "toast.session.export.failed.title": "Không thể xuất phiên",
   "toast.session.export.failed.description": "Đã xảy ra lỗi khi xuất phiên",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "Không thể tải phiên cho {{project}}",
   "toast.project.reloadFailed.title": "Không thể tải lại {{project}}",

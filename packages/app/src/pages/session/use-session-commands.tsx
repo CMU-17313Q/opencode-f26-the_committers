@@ -258,6 +258,28 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
     }
   }
 
+  const showMistakes = async () => {
+    const sessionID = params.id
+    if (!sessionID) return
+    try {
+      const result = await sdk().client.session.mistakes({ sessionID }, { throwOnError: true })
+      showToast({
+        persistent: true,
+        title: language.t("toast.session.mistakes.title"),
+        description: language.t("toast.session.mistakes.description", {
+          project: result.data.project,
+          session: result.data.session,
+        }),
+      })
+    } catch (err) {
+      showToast({
+        variant: "error",
+        title: language.t("toast.session.mistakes.failed.title"),
+        description: err instanceof Error ? err.message : language.t("toast.session.mistakes.failed.description"),
+      })
+    }
+  }
+
   const openFile = () => {
     void openDialog(
       () => import("@/components/dialog-select-file"),
@@ -496,6 +518,14 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
       slash: "export",
       disabled: !params.id,
       onSelect: exportSession,
+    }),
+    sessionCommand({
+      id: "session.mistakes",
+      title: language.t("command.session.mistakes"),
+      description: language.t("command.session.mistakes.description"),
+      slash: "mistakes",
+      disabled: !params.id,
+      onSelect: showMistakes,
     }),
   ]
 

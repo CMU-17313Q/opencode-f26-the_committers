@@ -193,6 +193,8 @@ export const dict = {
 
   "command.session.export": "ส่งออกเซสชัน",
   "command.session.export.description": "ส่งออกบันทึกทั้งหมดของเซสชันเป็น JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "ค้นหาไฟล์ คำสั่ง และเซสชัน",
   "palette.search.placeholder.home": "ค้นหาคำสั่งและเซสชัน",
@@ -661,6 +663,10 @@ export const dict = {
   "toast.session.export.success.description": "บันทึกเซสชันไปยัง {{filename}} แล้ว",
   "toast.session.export.failed.title": "ไม่สามารถส่งออกเซสชัน",
   "toast.session.export.failed.description": "เกิดข้อผิดพลาดขณะส่งออกเซสชัน",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "ไม่สามารถโหลดเซสชันสำหรับ {{project}}",
 

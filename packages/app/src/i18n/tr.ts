@@ -199,6 +199,8 @@ export const dict = {
 
   "command.session.export": "Oturumu dışa aktar",
   "command.session.export.description": "Oturumun tam dökümünü JSON olarak dışa aktar",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Dosya, komut ve oturum ara",
   "palette.search.placeholder.home": "Komut ve oturum ara",
@@ -669,6 +671,10 @@ export const dict = {
   "toast.session.export.success.description": "Oturum {{filename}} dosyasına kaydedildi",
   "toast.session.export.failed.title": "Oturum dışa aktarılamadı",
   "toast.session.export.failed.description": "Oturum dışa aktarılırken bir hata oluştu",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "{{project}} için oturumlar yüklenemedi",
 

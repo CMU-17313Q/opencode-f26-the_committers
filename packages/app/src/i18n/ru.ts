@@ -194,6 +194,8 @@ export const dict = {
 
   "command.session.export": "Экспортировать сессию",
   "command.session.export.description": "Экспортировать полную историю сессии в формате JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Поиск файлов, команд и сессий",
   "palette.search.placeholder.home": "Поиск команд и сессий",
@@ -664,6 +666,10 @@ export const dict = {
   "toast.session.export.success.description": "Сессия сохранена в файл {{filename}}",
   "toast.session.export.failed.title": "Не удалось экспортировать сессию",
   "toast.session.export.failed.description": "Произошла ошибка при экспорте сессии",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "Не удалось загрузить сессии для {{project}}",
 
