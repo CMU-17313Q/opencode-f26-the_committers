@@ -220,6 +220,8 @@ export const dict = {
 
   "command.session.export": "导出会话",
   "command.session.export.description": "将完整会话记录导出为 JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "搜索文件、命令和会话",
   "palette.search.placeholder.home": "搜索命令和会话",
@@ -665,6 +667,10 @@ export const dict = {
   "toast.session.export.success.description": "已将会话保存到 {{filename}}",
   "toast.session.export.failed.title": "导出会话失败",
   "toast.session.export.failed.description": "导出会话时发生错误",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "无法加载 {{project}} 的会话",
   "toast.update.title": "有可用更新",

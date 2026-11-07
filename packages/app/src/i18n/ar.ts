@@ -186,6 +186,8 @@ export const dict = {
   "command.session.unshare.description": "إيقاف مشاركة هذه الجلسة",
   "command.session.export": "تصدير الجلسة",
   "command.session.export.description": "تصدير النص الكامل للجلسة بصيغة JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "البحث في الملفات والأوامر والجلسات",
   "palette.search.placeholder.home": "البحث في الأوامر والجلسات",
@@ -617,6 +619,10 @@ export const dict = {
   "toast.session.export.success.description": "تم حفظ الجلسة في \u2068{{filename}}\u2069",
   "toast.session.export.failed.title": "فشل تصدير الجلسة",
   "toast.session.export.failed.description": "حدث خطأ أثناء تصدير الجلسة",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "فشل تحميل الجلسات لـ {{project}}",
   "toast.update.title": "تحديث متاح",

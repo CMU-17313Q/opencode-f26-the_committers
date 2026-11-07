@@ -195,6 +195,8 @@ export const dict = {
 
   "command.session.export": "Izvezi sesiju",
   "command.session.export.description": "Izvezi cijeli zapis sesije u JSON formatu",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Pretraži datoteke, komande i sesije",
   "palette.search.placeholder.home": "Pretraži komande i sesije",
@@ -666,6 +668,10 @@ export const dict = {
   "toast.session.export.success.description": "Sesija je sačuvana kao {{filename}}",
   "toast.session.export.failed.title": "Izvoz sesije nije uspio",
   "toast.session.export.failed.description": "Došlo je do greške prilikom izvoza sesije",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "Neuspjelo učitavanje sesija za {{project}}",
 

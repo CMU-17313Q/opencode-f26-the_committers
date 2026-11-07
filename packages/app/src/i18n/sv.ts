@@ -181,6 +181,8 @@ export const dict = {
   "command.session.unshare.description": "Sluta dela den här sessionen",
   "command.session.export": "Exportera session",
   "command.session.export.description": "Exportera hela sessionsutskriften som JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Sök efter filer, kommandon och sessioner",
   "palette.search.placeholder.home": "Sök bland kommandon och sessioner",
@@ -625,6 +627,10 @@ export const dict = {
   "toast.session.export.success.description": "Sessionen sparades i {{filename}}",
   "toast.session.export.failed.title": "Det gick inte att exportera sessionen",
   "toast.session.export.failed.description": "Ett fel uppstod när sessionen exporterades",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "Det gick inte att läsa in sessioner för {{project}}",
   "toast.project.reloadFailed.title": "Det gick inte att ladda om {{project}}",

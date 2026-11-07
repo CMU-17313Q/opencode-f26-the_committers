@@ -87,6 +87,8 @@ export const dict = {
   "command.session.unshare.description": "Lopeta tämän istunnon jakaminen",
   "command.session.export": "Vie istunto",
   "command.session.export.description": "Vie istunnon koko transkriptio JSON-muodossa",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Hae tiedostoja, komentoja ja istuntoja",
   "palette.search.placeholder.home": "Hae komentoja ja istuntoja",
@@ -516,6 +518,10 @@ export const dict = {
   "toast.session.export.success.description": "Istunto tallennettu tiedostoon {{filename}}",
   "toast.session.export.failed.title": "Istunnon vieminen epäonnistui",
   "toast.session.export.failed.description": "Istuntoa vietäessä tapahtui virhe",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "Projektin {{project}} istuntojen lataaminen epäonnistui",
   "toast.project.reloadFailed.title": "Projektin {{project}} lataaminen uudelleen epäonnistui",

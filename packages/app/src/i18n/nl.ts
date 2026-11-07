@@ -180,6 +180,8 @@ export const dict = {
   "command.session.unshare.description": "Stop met het delen van deze sessie",
   "command.session.export": "Sessie exporteren",
   "command.session.export.description": "Het volledige sessietranscript exporteren als JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "Zoek naar bestanden, opdrachten en sessies",
   "palette.search.placeholder.home": "Opdrachten en sessies zoeken",
@@ -627,6 +629,10 @@ export const dict = {
   "toast.session.export.success.description": "Sessie opgeslagen in {{filename}}",
   "toast.session.export.failed.title": "Kan sessie niet exporteren",
   "toast.session.export.failed.description": "Er is een fout opgetreden tijdens het exporteren van de sessie",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "Kan sessies voor {{project}} niet laden",
   "toast.project.reloadFailed.title": "Kan {{project}} niet opnieuw laden",

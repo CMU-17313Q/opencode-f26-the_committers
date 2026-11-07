@@ -83,6 +83,8 @@ export const dict = {
   "command.session.unshare.description": "이 세션 공유 중지",
   "command.session.export": "세션 내보내기",
   "command.session.export.description": "전체 세션 기록을 JSON으로 내보내기",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "파일, 명령어 및 세션 검색",
   "palette.search.placeholder.home": "명령어 및 세션 검색",
@@ -421,6 +423,10 @@ export const dict = {
   "toast.session.export.success.description": "세션 저장 위치: {{filename}}",
   "toast.session.export.failed.title": "세션 내보내기 실패",
   "toast.session.export.failed.description": "세션을 내보내는 동안 오류가 발생했습니다",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "{{project}}에 대한 세션을 로드하지 못했습니다",
   "toast.update.title": "업데이트 가능",

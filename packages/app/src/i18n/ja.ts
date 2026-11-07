@@ -186,6 +186,8 @@ export const dict = {
   "command.session.unshare.description": "このセッションの共有を停止",
   "command.session.export": "セッションをエクスポート",
   "command.session.export.description": "セッションの全記録を JSON としてエクスポート",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "ファイル、コマンド、セッションを検索",
   "palette.search.placeholder.home": "コマンドとセッションを検索",
@@ -619,6 +621,10 @@ export const dict = {
   "toast.session.export.success.description": "セッションを {{filename}} に保存しました",
   "toast.session.export.failed.title": "セッションのエクスポートに失敗しました",
   "toast.session.export.failed.description": "セッションのエクスポート中にエラーが発生しました",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "{{project}}のセッション読み込みに失敗しました",
   "toast.update.title": "アップデートが利用可能です",

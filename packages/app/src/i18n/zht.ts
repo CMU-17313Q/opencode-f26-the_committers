@@ -197,6 +197,8 @@ export const dict = {
 
   "command.session.export": "匯出工作階段",
   "command.session.export.description": "將完整的工作階段記錄匯出為 JSON",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "搜尋檔案、命令和工作階段",
   "palette.search.placeholder.home": "搜尋命令和工作階段",
@@ -657,6 +659,10 @@ export const dict = {
   "toast.session.export.success.description": "已將工作階段儲存至 {{filename}}",
   "toast.session.export.failed.title": "匯出工作階段失敗",
   "toast.session.export.failed.description": "匯出工作階段時發生錯誤",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "無法載入 {{project}} 的工作階段",
 

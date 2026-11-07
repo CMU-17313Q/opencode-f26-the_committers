@@ -186,6 +186,8 @@ export const dict = {
   "command.session.unshare.description": "اس سیشن نو شیئر کرنا بند کرو",
   "command.session.export": "سیشن برآمد کرو",
   "command.session.export.description": "سیشن دی پوری نقل JSON دی شکل وچ برآمد کرو",
+  "command.session.mistakes": "Show mistake patterns",
+  "command.session.mistakes.description": "Summarize recurring compiler and test mistakes",
 
   "palette.search.placeholder": "فائلاں، کمانڈز، تے سیشنز تلاش کرو",
   "palette.search.placeholder.home": "سرچ کمانڈز تے سیشنز",
@@ -630,6 +632,10 @@ export const dict = {
   "toast.session.export.success.description": "سیشن نوں \u2068{{filename}}\u2069 وچ محفوظ کر دتا گیا",
   "toast.session.export.failed.title": "سیشن برآمد کرن چ ناکامی ہوئی",
   "toast.session.export.failed.description": "سیشن برآمد کردے ویلے اک غلطی ہو گئی",
+  "toast.session.mistakes.title": "Mistake patterns",
+  "toast.session.mistakes.description": "This project: {{project}} This session: {{session}}",
+  "toast.session.mistakes.failed.title": "Failed to load mistake patterns",
+  "toast.session.mistakes.failed.description": "An error occurred while loading mistake patterns",
 
   "toast.session.listFailed.title": "{{project}} لئی سیشن لوڈ کرن چ ناکام رہیا",
   "toast.project.reloadFailed.title": "{{project}} دوبارہ لوڈ نئیں ہو سکیا",
