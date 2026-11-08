@@ -94,6 +94,7 @@ import { mcpHandlers } from "./handlers/mcp"
 import { permissionHandlers } from "./handlers/permission"
 import { projectHandlers } from "./handlers/project"
 import { projectCopyHandlers } from "./handlers/project-copy"
+import { ProjectClone } from "./clone"
 import { providerHandlers } from "./handlers/provider"
 import { ptyConnectHandlers, ptyHandlers } from "./handlers/pty"
 import { questionHandlers } from "./handlers/question"
@@ -192,6 +193,14 @@ const docRoute = HttpRouter.use((router) => router.add("GET", "/doc", () => Effe
   Layer.provide(authOnlyRouterLayer),
 )
 
+const cloneRoute = HttpRouter.use((router) =>
+  Effect.gen(function* () {
+    const git = yield* Git.Service
+    const fs = yield* FSUtil.Service
+    yield* router.add("POST", ProjectClone.route, ProjectClone.handler({ git, fs }))
+  }),
+).pipe(Layer.provide(authOnlyRouterLayer))
+
 const uiRoute = HttpRouter.use((router) =>
   Effect.gen(function* () {
     const fs = yield* FSUtil.Service
@@ -282,6 +291,7 @@ export function createRoutes(
     instanceRoutes,
     serverRoutes,
     docRoute,
+    cloneRoute,
     uiRoute,
   ).pipe(
     Layer.provide([
