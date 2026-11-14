@@ -1,0 +1,41 @@
+# Traceability: Leen Almeadadi (lalmeada)
+
+**Target feature:** `/suggest-tests`: reading the student's function and writing the final test file. Main files: [signature.ts](../packages/opencode/src/command/signature.ts) and [test-file-formatter.ts](../packages/opencode/src/command/test-file-formatter.ts). Property tests: [suggest-tests.property.test.ts](../packages/opencode/test/command/suggest-tests.property.test.ts).
+
+**Interview evidence:** C- = classmate (Laiba), S- = course staff (Khadeeja, CA), O- = outside (student who uses Claude). See my P4A workbook.
+
+## Requirements
+
+| ID | Interview evidence | Requirement | Acceptance Criteria | Changed in P4B? | Property (kind) | Test |
+|---|---|---|---|---|---|---|
+| R1 | C-6, S-4 | Changing a parameter name should not affect the generated test scenarios or expected results. | For any generated function, renaming one parameter (e.g. `add(a, b)` to `add(x, b)`) keeps every test's inputs and expected output the same. Only the name in the test descriptions changes. | No | Renaming a parameter gives the same tests apart from the name (metamorphic) | `R1: renaming a parameter keeps every input and expected result` |
+| R2 | C-5, S-3, O-5 | Generating tests repeatedly for an unchanged function should produce consistent results. | For any generated function, running `/suggest-tests` twice gives identical test files. | No | Two runs give the same file (invariant) | `R2: the same function always gives the same test file` |
+| R3 | C-7, O-7 | The formatter should produce valid TypeScript test files that can be executed. | For any list of test suggestions, the generated file has no syntax errors and one `test(...)` per suggestion. | Yes (acceptance criteria only) | Every generated file is valid TypeScript (invariant) | `R3: every generated test file is valid TypeScript` |
+| R4 | S-5, S-6, C-7, O-6, O-7 | Every test with a known expected answer is written as `expect(fn(args)).toEqual(answer)`, with the arguments in order. | For any suggestion with a known answer, its test is exactly `expect(<function>(<inputs>)).toEqual(<expected>)`, e.g. `expect(divide(10, 2)).toEqual(5)`. | Yes | Matches a simple model of the expected line (model / oracle) | `R4: known-answer tests match the simple model expect(fn(args)).toEqual(answer)` |
+| R5 | S-7, C-2, S-3, O-2 | Every test title starts with its number and its category (`expected`, `edge` or `error`), so a student can tell normal cases from edge cases and error cases at a glance. | For any list of suggestions, test *i* is titled `i. <category>: ...` with the category of its suggestion, e.g. `1. expected: ...` for a normal case and `3. edge: ...` for an edge case. | Yes | Each title shows its number and category (invariant) | `R5: every test title starts with its number and category` |
+| R6 | C-3, C-7, O-7, O-4 | The formatter must keep the expected values exactly as they were provided by the test-generation logic. | For any expected value (including 0, -0, large numbers, unicode text, nested arrays and objects), reading it back from the generated file gives the original value. | No | Write the value into the file, read it back, compare (round-trip) | `R6: expected values read back from the file equal the originals`, `R6: negative-zero results from real functions survive formatting` |
+| R7 | C-4, S-1, S-2, O-3 | When the expected output is unknown, the generated test never asserts a specific value and shows a note to check it manually. | For any suggestion with an "Unknown" output, its test has no `.toEqual(` and has the comment `Expected output could not be derived automatically.` | Yes | Unknown answers are never asserted and always flagged (invariant) | `R7: unknown answers are never asserted and are always flagged` |
+
+Properties written or suggested by opencode or another AI tool: R1 to R7. The properties, generators and formatter fixes were written with help of an AI tool (Claude). I reviewed and ran each one, and checked it against its requirement and interview evidence.
+
+## Requirement changes
+
+| ID | Original requirement (P4A) | Revised requirement | Why it changed |
+|---|---|---|---|
+| R3 | Same requirement. Acceptance criteria: "run it using the project's test runner; it should execute without syntax errors." | Same requirement. Acceptance criteria: the generated file has no syntax errors when parsed. | Checkability: interviewees said they would run the generated tests (C-7, O-7), so the file must never be broken. But running `bun test` on each of the hundreds of files fast-check generates is too slow for a property test. Parsing the file with the TypeScript parser checks the same thing, that there are no syntax errors, in milliseconds. |
+| R4 | Each test should clearly show the function call, arguments, and expected result. | Every test with a known expected answer is written as `expect(fn(args)).toEqual(answer)`, with the arguments in order. | Checkability: "clearly" is too vague to test, since it depends on who is reading. What interviewees actually need is to see the call and its answer together: Khadeeja checks a test by tracing the call through the function (S-5), and Shahd and Laiba compare the actual result with the expected one (O-7, C-7). An exact format guarantees the function, its arguments in order, and the expected answer all appear in one line. |
+| R5 | The formatted test file can distinguish normal cases from edge cases. | Every test title starts with its number and its category (`expected`, `edge` or `error`). | Checkability: "can distinguish" doesn't say how, so there is nothing to test. Interviewees wanted both normal and edge cases (C-2, O-2), and Khadeeja asked to "differentiate the case classes, like saying these are edge cases" (S-7), so a student can see which kind of case each test covers. Putting the category at the start of every title does that in a way a test can check. The titles already had these labels, so this requirement was already implemented; the property makes sure it stays that way. Grouping tests into separate "normal", "edge" and "error" sections, a stronger reading of S-7, is left for later work. |
+| R7 | The system must handle unsupported or unknown parameter types without crashing or incorrectly interpreting them, and explain why it cannot process the parameter. | When the expected output is unknown, the generated test never asserts a specific value and shows a note to check it manually. | Feasibility: the tool can't explain a type it doesn't understand, and an unknown type usually doesn't stop it from making tests anyway. What interviewees actually wanted was for it not to fake answers: Laiba said it "should explain the issue instead of guessing" (C-4), Khadeeja said it should only give answers it is sure of and "notify you to double-check" (S-1, S-2), and Shahd said it "shouldn't give me wrong answers and act like they're correct" (O-3). Not asserting an unknown answer, and flagging it, does that and can be checked. |
+
+R1, R2 and R6 were kept as written: each one already says exactly what should happen (same tests after a rename, same file on every run, the same values in the file), so a test can check it directly, and the code can do it.
+
+## Triage log
+
+| Property | Counterexample | Decision | Fix |
+|---|---|---|---|
+| R3, R5, R7 | A description containing a line break such as `"\r${"`, for a test with an Unknown output | Code bug: the line break ended the `// Reason:` comment, so the rest became broken code | `escapeComment` now removes every kind of line break (`\n`, `\r`, U+2028, U+2029) |
+| R4, R6 | Values containing `-0`, e.g. expected output `-0`, or `neg(0)` for `return -a` | Code bug: `-0` was written as `0`, and `toEqual` treats them as different | `serialize` writes `-0` as `-0` |
+| R6 | An object with a key named `__proto__` (found on a later run: failed on run 26 of 40 repeated runs, seed -1261793143) | Code bug: `{"__proto__": ...}` in code sets the prototype instead of adding a key | `serialize` writes that key as `["__proto__"]` |
+| R4 | Same `__proto__` input | Wrong test: my R4 model wrote the key the same wrong way, so it missed the bug | Fixed the model, and made the generator always try `__proto__` keys |
+
+First run: 2 pass, 6 fail. After the fixes: 8 pass, 0 fail, and the existing `/suggest-tests` tests still pass.
