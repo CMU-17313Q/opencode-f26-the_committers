@@ -24,7 +24,13 @@ describe("StudentErrorParser", () => {
 
   test("reads an undefined name", () => {
     expect(StudentErrorParser.parse("src/main.ts(12,3): error TS2304: Cannot find name 'coutn'.")).toEqual([
-      { category: "undefined_name", code: "TS2304", message: "Cannot find name 'coutn'.", file: "src/main.ts", line: 12 },
+      {
+        category: "undefined_name",
+        code: "TS2304",
+        message: "Cannot find name 'coutn'.",
+        file: "src/main.ts",
+        line: 12,
+      },
     ])
   })
 
@@ -51,6 +57,16 @@ describe("StudentErrorParser", () => {
     expect(StudentErrorParser.parse(output)).toEqual([
       { category: "syntax_error", code: "TS1005", message: "';' expected.", file: "src/main.ts", line: 3 },
     ])
+  })
+
+  test("ignores a failed test that passes on a retry", () => {
+    const output = [
+      "(fail) adds two numbers [3.00ms]",
+      "(pass) adds two numbers [2.00ms]",
+      "(fail) divides [1.00ms]",
+    ].join("\n")
+
+    expect(StudentErrorParser.parse(output)).toEqual([{ category: "test_failed", message: "divides" }])
   })
 
   test("returns nothing when there are no errors", () => {
