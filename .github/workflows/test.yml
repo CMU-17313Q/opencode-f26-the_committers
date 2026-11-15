@@ -64,6 +64,10 @@ jobs:
         # contention issue typecheck.yml already caps for tsgo.
         run: GITHUB_ACTIONS=false bun turbo test --concurrency=4
 
+      - name: Run mistake summary property tests
+        working-directory: packages/opencode
+        run: GITHUB_ACTIONS=false bun test test/cli/mistakes.property.test.ts
+
       - name: Check generated client
         timeout-minutes: 5
         working-directory: packages/client

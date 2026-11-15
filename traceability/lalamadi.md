@@ -1,0 +1,18 @@
+# Project 4B Traceability — `/mistakes`
+
+## Requirements
+
+| ID | Interview evidence | Requirement | Acceptance criteria | Changed in P4B? | Property | Test |
+| --- | --- | --- | --- | --- | --- | --- |
+| R1 | C-4, C-5, S-6, O-5. Interviewees wanted the most frequent mistake types first. | The frequency summary sorts mistake types from highest count to lowest count. | Given two failed tests and four undefined-name errors, the summary lists 4 undefined-name errors first and 2 failed tests second, even if a failed test was recorded first. | No | Invariant — displayed counts are in descending order. ChatGPT suggested the property and generator. | `packages/opencode/test/cli/mistakes.property.test.ts` |
+| R2 | S-3, O-2. Both wanted to see mistakes that happened only once. S-2. Jeremy asked what the no-pattern message meant. | If mistakes were recorded but none occurred more than once, the summary displays “No recurring mistake patterns found.” | Given one syntax error and one failed test, the summary displays “No recurring mistake patterns found.” | Yes | Invariant — histories with only one-off mistakes report no recurring patterns. ChatGPT suggested the property and generator. | `packages/opencode/test/cli/mistakes.property.test.ts` |
+| R3 | C-2. The classmate wanted to see her three most recent mistakes. | A separate Recent Mistakes list shows up to three individual mistakes, newest first. | Given four mistakes recorded in the order A, B, C, D, the recent list displays D, C, B, in that order. | No | | |
+| R4 | S-4, O-3. Both expected a removed occurrence to stop contributing to the summary. | When a mistake occurrence is removed from the history, the summary updates the count for that mistake type. | Given two undefined-name errors, adding a third changes the count to 3. Removing that third occurrence changes the count back to 2. | No | | |
+| R5 | C-4, S-5, O-4. Interviewees expected the same mistakes to count regardless of the order in which they occurred. | Reordering the same history preserves the displayed mistake types and counts in the recurring-pattern summary. | Given the histories `typo, failed test, typo, failed test` and `typo, typo, failed test, failed test`, both summaries display 2 typos and 2 failed tests. | Yes | Metamorphic — shuffling the history preserves displayed types and counts. ChatGPT suggested the property and generator. | `packages/opencode/test/cli/mistakes.property.test.ts` |
+
+## Requirement changes
+
+| ID | Original wording | Revised wording | Why I changed it |
+| --- | --- | --- | --- |
+| R2 | The frequency summary includes mistake types that occur only once. | If mistakes were recorded but none occurred more than once, the summary displays “No recurring mistake patterns found.” | My first test failed with one syntax error and one failed test because neither occurred twice. Listing one-off mistakes would change the purpose of the recurring-pattern summary. The revised requirement specifies what users see in that situation, which connects to Jeremy’s question in S-2. |
+| R5 | Reordering the same history preserves the mistake types and counts in the frequency summary. | Reordering the same history preserves the displayed mistake types and counts in the recurring-pattern summary. | My original example expected a one-off failed test to appear, which conflicted with the revised R2. The new example uses two recurring types and still checks what interviewees asked for about recording order. |
