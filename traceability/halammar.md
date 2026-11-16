@@ -58,4 +58,4 @@ To be completed after running the properties against the implementation and reso
 
 ## AI Use Disclosure
 
-AI assistance was used to help review and revise the requirements and prepare the traceability document. The requirements remain based on the original Project 4A interviews and their acceptance criteria.
+AI assistance was used to help review and revise the requirements.
