@@ -110,7 +110,10 @@ describe("Expected and Edge Case Properties", () => {
         const cases = EdgeCases.generate(signature)
 
         for (let index = 0; index < count; index++) {
-          const values = cases.map((item) => item.input[index])
+          // Only access inputs that are arrays.
+          const values = cases.flatMap((item) =>
+            Array.isArray(item.input) ? [item.input[index]] : [],
+          )
 
           expect(values).toContain(0)
           expect(values).toContain(-1)
