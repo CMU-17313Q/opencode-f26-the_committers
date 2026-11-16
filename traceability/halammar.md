@@ -13,13 +13,13 @@ The requirements from Project 4A were reviewed to determine whether they are fea
 
 | ID | Interview evidence | Requirement | Acceptance criteria | Changed in P4B? | Property | Test |
 |---|---|---|---|---|---|---|
-| R1 | C-3, S-1, S-2, O-3 | The system must not present uncertain expected outputs as definitely correct. It should indicate when manual verification is needed. | When the expected output cannot be determined from the available function information, the system must indicate that it cannot determine the answer instead of presenting an unverified output as correct. | Yes | To be completed in Step 2 | To be completed in Step 2 |
-| R2 | C-5, S-3, O-5 | Generating test cases multiple times for an unchanged function should produce consistent categories of test cases. | When `/suggest-tests` is run twice on the same function, both results should cover the same general scenario categories, even if the exact input values differ. | No | To be completed in Step 2 | To be completed in Step 2 |
-| R3 | C-6, S-4 | Changing only a parameter's name should not change the generated test scenarios or expected outputs. | Given a function, rename one parameter without changing its type or functionality. The generated test cases should preserve the same behavioral scenarios and expected outputs, with only necessary parameter references updated. | Yes | To be completed in Step 2 | To be completed in Step 2 |
-| R4 | C-2, O-2, O-4 | The system must generate both normal test cases and edge cases for a function. | Given an addition function, the generated cases should include normal inputs and unusual inputs such as zero, negative numbers, and large numbers. | No | To be completed in Step 2 | To be completed in Step 2 |
-| R5 | S-7 | The system should distinguish between normal test cases and edge cases by labeling or grouping them. | When test cases are generated, each case should be assigned to an appropriate category, such as normal or edge case. | No | To be completed in Step 2 | To be completed in Step 2 |
-| R6 | S-5, S-6, C-7, O-7 | The generated expected outputs must match the correct results for supported simple functions with known expected outputs. | Given a simple function with predefined correct results, generate test cases and compare their expected outputs against independently calculated results. All generated expected outputs must match. | Yes | To be completed in Step 2 | To be completed in Step 2 |
-| R7 | C-4 | The system must handle unknown or unsupported parameter types without crashing or generating random values. | Given a function with an unsupported parameter type, the system should handle it gracefully and explain why it could not generate a suitable test case. | No | To be completed in Step 2 | To be completed in Step 2 |
+| R1 | C-3, S-1, S-2, O-3 | The system must not present uncertain expected outputs as definitely correct. It should indicate when manual verification is needed. | When the expected output cannot be determined from the available function information, the system must indicate that it cannot determine the answer instead of presenting an unverified output as correct. | Yes | Not implemented | — |
+| R2 | C-5, S-3, O-5 | Generating test cases multiple times for an unchanged function should produce consistent categories of test cases. | When `/suggest-tests` is run twice on the same function, both results should cover the same general scenario categories, even if the exact input values differ. | No | Invariant | R2: repeated generation preserves test case categories |
+| R3 | C-6, S-4 | Changing only a parameter's name should preserve the generated test scenarios and expected outputs. | Given a function, rename one parameter without changing its type or functionality. The generated test cases should preserve the same behavioral scenarios and expected outputs, with only necessary parameter references updated. | Yes | Metamorphic | R3: renaming a parameter preserves generated results |
+| R4 | C-2, O-2, O-4 | The system must generate both normal test cases and edge cases for a function. | Given an addition function, the generated cases should include normal inputs and unusual inputs such as zero, negative numbers, and large numbers. | No | Invariant | R4: edge cases include important numeric boundary values |
+| R5 | S-7 | The system should distinguish between normal test cases and edge cases by labeling or grouping them. | When test cases are generated, each case should be assigned to an appropriate category, such as normal or edge case. | No | Not implemented | — |
+| R6 | S-5, S-6, C-7, O-7 | The generated expected outputs must match the correct results for supported simple functions with known expected outputs. | Given a simple function with predefined correct results, generate test cases and compare their expected outputs against independently calculated results. All generated expected outputs must match. | Yes | Model/oracle | R6: expected outputs match independently calculated results |
+| R7 | C-4 | The system must handle unknown or unsupported parameter types without crashing or generating random values. | Given a function with an unsupported parameter type, the system should handle it gracefully and explain why it could not generate a suitable test case. | No | Not implemented | — |
 
 ## Requirement Changes
 
@@ -50,12 +50,65 @@ R2, R4, R5, and R7 were kept as written because their acceptance criteria descri
 
 ## Step 2: Properties and Tests
 
-To be completed after implementing the property-based tests.
+Four property-based tests were implemented using fast-check for requirements R2, R3, R4, and R6. The properties use three different kinds: invariant, metamorphic, and model/oracle.
+
+### R2 – Consistent Test Case Categories
+
+- **Kind:** Invariant
+- **Property:** Generating test cases multiple times for an unchanged function should produce consistent categories.
+- **Test:** `R2: repeated generation preserves test case categories`
+- **Generator:** Generates function signatures with different numbers of parameters and primitive types (number, string, and boolean).
+- **What it checks:** Generates test cases twice for the same function and compares the resulting categories.
+
+### R3 – Parameter Renaming
+
+- **Kind:** Metamorphic
+- **Property:** Changing only a parameter's name should preserve generated test scenarios and expected outputs.
+- **Test:** `R3: renaming a parameter preserves generated results`
+- **Generator:** Uses different pairs of parameter names while keeping the parameter type and function behavior unchanged.
+- **What it checks:** Compares the generated inputs and expected outputs before and after renaming the parameter.
+
+### R4 – Edge Case Generation
+
+- **Kind:** Invariant
+- **Property:** The system must generate important numeric boundary values for edge cases.
+- **Test:** `R4: edge cases include important numeric boundary values`
+- **Generator:** Generates function signatures with between one and four numeric parameters.
+- **What it checks:** Verifies that generated edge cases include zero, negative one, fractional values, and large numbers.
+
+### R6 – Expected Output Correctness
+
+- **Kind:** Model/oracle
+- **Property:** Generated expected outputs must match independently calculated results for supported simple functions.
+- **Test:** `R6: expected outputs match independently calculated results`
+- **Generator:** Uses fast-check to generate pairs of integers.
+- **What it checks:** Tests an addition function and compares the generated expected output against the independently calculated sum. It also verifies that the function does not throw an error.
+
+### Property Test File
+
+`packages/opencode/test/command/expected-cases.property.test.ts`
+
+The generators were selected to explore different function signatures, parameter names, and numeric inputs instead of relying on a single example. The tests use fast-check to generate multiple inputs and check whether the properties hold.
 
 ## Step 3: Running, Triaging, and Fixing
 
-To be completed after running the properties against the implementation and resolving any failures.
+The property test file was committed to the `halammar/properties` branch and checked through GitHub Actions.
+
+During the initial typecheck, two TypeScript errors were identified:
+
+1. `item.input` could be null.
+2. TypeScript could not guarantee that `item.input` was an array when accessing it using a numeric index.
+
+These errors were caused by the test code, not the application implementation.
+
+**Fix:** Updated the R4 property to check whether `item.input` is an array using `Array.isArray()` before accessing its elements. This safely handles nullable and non-array inputs.
+
+After the correction, the GitHub Actions typecheck workflow completed successfully.
+
+The unit test and E2E smoke test jobs also completed successfully in the earlier test workflow.
+
+No application implementation changes were needed to fix the TypeScript errors.
 
 ## AI Use Disclosure
 
-AI assistance was used to help review and revise the requirements.
+AI assistance was used to help review and revise requirements.
