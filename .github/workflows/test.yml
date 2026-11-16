@@ -1,3 +1,4 @@
+
 name: test
 
 on:
@@ -22,9 +23,6 @@ jobs:
   unit:
     name: unit
     runs-on: ubuntu-latest
-    # Belt-and-suspenders: without this, a step with no timeout-minutes of its
-    # own that hangs runs until GitHub's default 6h job cap instead of failing
-    # fast (see the httpapi-exercise incident this guards against).
     timeout-minutes: 30
     defaults:
       run:
@@ -60,9 +58,13 @@ jobs:
       - name: Run unit tests
         timeout-minutes: 15
         # Default turbo concurrency (10) oversubscribes ubuntu-latest's 4
-        # vCPUs across 5 packages' test tasks running at once — same
-        # contention issue typecheck.yml already caps for tsgo.
+        # vCPUs across 5 packages' test tasks running at once.
         run: GITHUB_ACTIONS=false bun turbo test --concurrency=4
+
+      - name: Run property-based tests
+        timeout-minutes: 5
+        working-directory: packages/opencode
+        run: bun test --timeout 30000 test/command/expected-cases.property.test.ts
 
       - name: Check generated client
         timeout-minutes: 5
@@ -74,11 +76,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.playwright-browsers
-      # Default CI worker count (5) oversubscribes a standard GitHub-hosted
-      # runner running a live Vite dev server alongside that many Chromium
-      # instances, producing widespread toBeVisible() timeouts unrelated to
-      # the features under test. Lower concurrency trades wall-clock time
-      # for reliability.
       PLAYWRIGHT_WORKERS: "2"
     defaults:
       run:
@@ -92,7 +89,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          # Playwright 1.59 hangs while extracting Chromium with Node 24.16.
           node-version: "24.15"
 
       - name: Setup Bun
@@ -121,9 +117,7 @@ jobs:
         run: bunx playwright install chromium
 
       - name: Run app e2e smoke tests
-        # Full regression suite (packages/app/e2e/regression) runs nightly
-        # instead of on every push — see e2e-regression.yml. This keeps
-        # every-push feedback fast while still catching broad regressions.
+        # Full regression suite runs nightly instead of on every push.
         run: bun --cwd packages/app test:e2e:local e2e/smoke e2e/user-story
         env:
           CI: true
