@@ -15,11 +15,17 @@ function normalizeMessage(message: string): string {
     .trim()
 }
 
+// some compiler codes report the same mistake as another code, with a "Did you mean ...?" spelling
+// suggestion added, so students fix them the same way: TS2552 is TS2304 ("Cannot find name") and
+// TS2551 is TS2339 ("Property does not exist") with a suggestion
+const suggestionOf: Record<string, string> = { TS2552: "TS2304", TS2551: "TS2339" }
+
 // two mistakes are "the same kind" when they're in the same category, and either share a
-// compiler error code or have the same normalized message shape
+// compiler error code (counting a suggestion code as its base code) or have the same normalized
+// message shape
 export function isSameKind(a: Fingerprint, b: Fingerprint): boolean {
   if (a.category !== b.category) return false
-  if (a.code && b.code) return a.code === b.code
+  if (a.code && b.code) return (suggestionOf[a.code] ?? a.code) === (suggestionOf[b.code] ?? b.code)
   return normalizeMessage(a.message) === normalizeMessage(b.message)
 }
 
