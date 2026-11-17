@@ -350,7 +350,19 @@ describe("StudentErrorClassifier properties", () => {
         (input) => {
           const rows = input.mistakes.map((m) => m.row)
           const before = StudentErrorSummary.report(rows)
-          const fixed = [...rows, ...input.fixes.flatMap((output) => StudentErrorParser.parse(output))]
+          // store whatever the parser finds in the clean runs as rows, the way the shell tool records them
+          const recorded = input.fixes
+            .flatMap((output) => StudentErrorParser.parse(output))
+            .map((error) =>
+              row({
+                category: error.category,
+                code: error.code ?? null,
+                message: error.message,
+                file: error.file ?? null,
+                line: error.line ?? null,
+              }),
+            )
+          const fixed = [...rows, ...recorded]
           expect(StudentErrorSummary.report(fixed)).toBe(before)
           const after = byKind(StudentErrorSummary.report([...fixed, ...input.more.map((m) => m.row)]))
           Object.entries(byKind(before)).forEach(([key, counts]) =>
