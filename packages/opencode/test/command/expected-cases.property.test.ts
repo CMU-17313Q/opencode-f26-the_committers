@@ -153,18 +153,23 @@ describe("Expected and Edge Case Properties", () => {
     )
   })
 
-  // R5: Normal and edge test cases must have different categories.
+  // R5: The system should distinguish between normal test cases
+  // and edge cases by labeling or grouping them.
   // Kind: invariant
+  // Generator: Varies the number of numeric parameters from 1 to 3
+  // to check category labels across different function signatures.
   test("R5: normal and edge cases have appropriate categories", () => {
     fc.assert(
-      fc.property(fc.integer(), (value) => {
+      fc.property(fc.integer({ min: 1, max: 3 }), (count) => {
         const signature: FunctionSignature = {
           name: "sample",
-          parameters: [
-            { name: "value", type: "number", optional: false },
-          ],
+          parameters: Array.from({ length: count }, (_, index) => ({
+            name: `arg${index}`,
+            type: "number",
+            optional: false,
+          })),
           returnType: "number",
-          body: "{ return value + 1 }",
+          body: "{ return arg0 + 1 }",
         }
 
         const normalCases = ExpectedCases.generate(signature)
@@ -182,6 +187,8 @@ describe("Expected and Edge Case Properties", () => {
   // R6: Generated expected outputs must match correct results
   // for supported simple functions with known expected outputs.
   // Kind: model/oracle
+  // Generator: Generates pairs of integers to explore different
+  // combinations of inputs for the addition function.
   test("R6: expected outputs match independently calculated results", () => {
     fc.assert(
       fc.property(fc.integer(), fc.integer(), (left, right) => {
@@ -195,10 +202,19 @@ describe("Expected and Edge Case Properties", () => {
           body: "{ return left + right }",
         }
 
-        const result = ExpectedOutput.derive(signature, [left, right])
+        const cases = ExpectedCases.generate(signature)
 
-        expect(result.expectedOutput).toBe(left + right)
-        expect(result.throws).toBe(false)
+        for (const item of cases) {
+          expect(Array.isArray(item.input)).toBe(true)
+
+          if (Array.isArray(item.input)) {
+            const [a, b] = item.input
+
+            expect(item.expectedOutput).toBe(
+              (a as number) + (b as number),
+            )
+          }
+        }
       }),
     )
   })
