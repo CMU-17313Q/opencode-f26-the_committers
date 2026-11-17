@@ -63,7 +63,12 @@ jobs:
         # vCPUs across 5 packages' test tasks running at once — same
         # contention issue typecheck.yml already caps for tsgo.
         run: GITHUB_ACTIONS=false bun turbo test --concurrency=4
-
+      # The opencode test script uses --only-failures, so passing tests never show in the log above.
+      # Run the mistake classifier properties on their own so the log lists each one (P4B).
+      - name: Run mistake classifier property tests
+        timeout-minutes: 5
+        working-directory: packages/opencode
+        run: GITHUB_ACTIONS=false bun test --timeout 30000 test/student-error/student-error-classifier.property.test.ts
       - name: Check generated client
         timeout-minutes: 5
         working-directory: packages/client

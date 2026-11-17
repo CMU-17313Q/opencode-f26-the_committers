@@ -78,6 +78,18 @@ describe("StudentErrorClassifier", () => {
     expect(result.matches).toHaveLength(0)
   })
 
+  test("matches an undefined name error with and without a 'Did you mean' suggestion", () => {
+    // found by the R5 and R7 properties in traceability/dalmohan.md: TS2552 is TS2304 with a
+    // spelling suggestion, so it is the same mistake and must be counted in the same kind
+    const history = [row({ category: "undefined_name", code: "TS2304", message: "Cannot find name 'count'." })]
+    const result = StudentErrorClassifier.classify(
+      { category: "undefined_name", code: "TS2552", message: "Cannot find name 'cont'. Did you mean 'count'?" },
+      history,
+    )
+    expect(result.isNewPattern).toBe(false)
+    expect(result.matches).toHaveLength(1)
+  })
+
   test("groups a new mistake with every matching past mistake, not just the first", () => {
     const history = [
       row({ category: "undefined_name", code: "TS2304", message: "Cannot find name 'coutn'.", file: "a.ts" }),
